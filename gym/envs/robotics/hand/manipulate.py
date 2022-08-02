@@ -9,9 +9,7 @@ try:
     import mujoco_py
 except ImportError as e:
     raise error.DependencyNotInstalled(
-        "{}. (HINT: you need to install mujoco_py, and also perform the setup instructions here: https://github.com/openai/mujoco-py/.)".format(
-            e
-        )
+        f"{e}. (HINT: you need to install mujoco_py, and also perform the setup instructions here: https://github.com/openai/mujoco-py/.)"
     )
 
 
@@ -152,8 +150,7 @@ class ManipulateEnv(hand_env.HandEnv):
         d_pos, d_rot = self._goal_distance(achieved_goal, desired_goal)
         achieved_pos = (d_pos < self.distance_threshold).astype(np.float32)
         achieved_rot = (d_rot < self.rotation_threshold).astype(np.float32)
-        achieved_both = achieved_pos * achieved_rot
-        return achieved_both
+        return achieved_pos * achieved_rot
 
     def _env_setup(self, initial_qpos):
         for name, value in initial_qpos.items():
@@ -200,9 +197,8 @@ class ManipulateEnv(hand_env.HandEnv):
                 )
 
         # Randomize initial position.
-        if self.randomize_initial_position:
-            if self.target_position != "fixed":
-                initial_pos += self.np_random.normal(size=3, scale=0.005)
+        if self.randomize_initial_position and self.target_position != "fixed":
+            initial_pos += self.np_random.normal(size=3, scale=0.005)
 
         initial_quat /= np.linalg.norm(initial_quat)
         initial_qpos = np.concatenate([initial_pos, initial_quat])
@@ -237,9 +233,7 @@ class ManipulateEnv(hand_env.HandEnv):
         elif self.target_position in ["ignore", "fixed"]:
             target_pos = self.sim.data.get_joint_qpos("object:joint")[:3]
         else:
-            raise error.Error(
-                'Unknown target_position option "{}".'.format(self.target_position)
-            )
+            raise error.Error(f'Unknown target_position option "{self.target_position}".')
         assert target_pos is not None
         assert target_pos.shape == (3,)
 
@@ -264,15 +258,12 @@ class ManipulateEnv(hand_env.HandEnv):
         elif self.target_rotation in ["ignore", "fixed"]:
             target_quat = self.sim.data.get_joint_qpos("object:joint")
         else:
-            raise error.Error(
-                'Unknown target_rotation option "{}".'.format(self.target_rotation)
-            )
+            raise error.Error(f'Unknown target_rotation option "{self.target_rotation}".')
         assert target_quat is not None
         assert target_quat.shape == (4,)
 
         target_quat /= np.linalg.norm(target_quat)  # normalized quaternion
-        goal = np.concatenate([target_pos, target_quat])
-        return goal
+        return np.concatenate([target_pos, target_quat])
 
     def _render_callback(self):
         # Assign current state to target object but offset a bit so that the actual object

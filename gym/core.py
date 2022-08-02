@@ -149,9 +149,9 @@ class Env(object):
 
     def __str__(self):
         if self.spec is None:
-            return "<{} instance>".format(type(self).__name__)
+            return f"<{type(self).__name__} instance>"
         else:
-            return "<{}<{}>>".format(type(self).__name__, self.spec.id)
+            return f"<{type(self).__name__}<{self.spec.id}>>"
 
     def __enter__(self):
         """Support with-statement for the environment."""
@@ -182,9 +182,7 @@ class GoalEnv(Env):
         for key in ["observation", "achieved_goal", "desired_goal"]:
             if key not in self.observation_space.spaces:
                 raise error.Error(
-                    'GoalEnv requires the "{}" key to be part of the observation dictionary.'.format(
-                        key
-                    )
+                    f'GoalEnv requires the "{key}" key to be part of the observation dictionary.'
                 )
 
     @abstractmethod
@@ -232,9 +230,7 @@ class Wrapper(Env):
 
     def __getattr__(self, name):
         if name.startswith("_"):
-            raise AttributeError(
-                "attempted to get missing private attribute '{}'".format(name)
-            )
+            raise AttributeError(f"attempted to get missing private attribute '{name}'")
         return getattr(self.env, name)
 
     @property
@@ -277,9 +273,7 @@ class Wrapper(Env):
 
     @property
     def metadata(self):
-        if self._metadata is None:
-            return self.env.metadata
-        return self._metadata
+        return self.env.metadata if self._metadata is None else self._metadata
 
     @metadata.setter
     def metadata(self, value):
@@ -304,7 +298,7 @@ class Wrapper(Env):
         return self.env.compute_reward(achieved_goal, desired_goal, info)
 
     def __str__(self):
-        return "<{}{}>".format(type(self).__name__, self.env)
+        return f"<{type(self).__name__}{self.env}>"
 
     def __repr__(self):
         return str(self)

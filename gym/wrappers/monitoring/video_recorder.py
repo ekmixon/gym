@@ -50,10 +50,9 @@ class VideoRecorder(object):
                 self.ansi_mode = True
             else:
                 logger.info(
-                    'Disabling video recorder because {} neither supports video mode "rgb_array" nor "ansi".'.format(
-                        env
-                    )
+                    f'Disabling video recorder because {env} neither supports video mode "rgb_array" nor "ansi".'
                 )
+
                 # Whoops, turns out we shouldn't be enabled after all
                 self.enabled = False
                 return
@@ -86,10 +85,9 @@ class VideoRecorder(object):
                 else ""
             )
             raise error.Error(
-                "Invalid path given: {} -- must have file extension {}.{}".format(
-                    self.path, required_ext, hint
-                )
+                f"Invalid path given: {self.path} -- must have file extension {required_ext}.{hint}"
             )
+
         # Touch the file in any case, so we know it's present. (This
         # corrects for platform platform differences. Using ffmpeg on
         # OS X, the file is precreated, but not on Linux.
@@ -107,7 +105,7 @@ class VideoRecorder(object):
         self.metadata["content_type"] = (
             "video/vnd.openai.ansivid" if self.ansi_mode else "video/mp4"
         )
-        self.metadata_path = "{}.meta.json".format(path_base)
+        self.metadata_path = f"{path_base}.meta.json"
         self.write_metadata()
 
         logger.info("Starting new video recorder writing to %s", self.path)
@@ -134,15 +132,14 @@ class VideoRecorder(object):
         if frame is None:
             if self._async:
                 return
-            else:
-                # Indicates a bug in the environment: don't want to raise
-                # an error here.
-                logger.warn(
-                    "Env returned None on render(). Disabling further rendering for video recorder by marking as disabled: path=%s metadata_path=%s",
-                    self.path,
-                    self.metadata_path,
-                )
-                self.broken = True
+            # Indicates a bug in the environment: don't want to raise
+            # an error here.
+            logger.warn(
+                "Env returned None on render(). Disabling further rendering for video recorder by marking as disabled: path=%s metadata_path=%s",
+                self.path,
+                self.metadata_path,
+            )
+            self.broken = True
         else:
             self.last_frame = frame
             if self.ansi_mode:
@@ -236,24 +233,20 @@ class TextEncoder(object):
             string = frame.getvalue()
         else:
             raise error.InvalidFrame(
-                "Wrong type {} for {}: text frame must be a string or StringIO".format(
-                    type(frame), frame
-                )
+                f"Wrong type {type(frame)} for {frame}: text frame must be a string or StringIO"
             )
+
 
         frame_bytes = string.encode("utf-8")
 
         if frame_bytes[-1:] != b"\n":
-            raise error.InvalidFrame(
-                'Frame must end with a newline: """{}"""'.format(string)
-            )
+            raise error.InvalidFrame(f'Frame must end with a newline: """{string}"""')
 
         if b"\r" in frame_bytes:
             raise error.InvalidFrame(
-                'Frame contains carriage returns (only newlines are allowed: """{}"""'.format(
-                    string
-                )
+                f'Frame contains carriage returns (only newlines are allowed: """{string}"""'
             )
+
 
         self.frames.append(frame_bytes)
 
@@ -276,16 +269,15 @@ class TextEncoder(object):
 
         # Calculate frame size from the largest frames.
         # Add some padding since we'll get cut off otherwise.
-        height = max([frame.count(b"\n") for frame in self.frames]) + 1
+        height = max(frame.count(b"\n") for frame in self.frames) + 1
         width = (
             max(
-                [
-                    max([len(line) for line in frame.split(b"\n")])
-                    for frame in self.frames
-                ]
+                max(len(line) for line in frame.split(b"\n"))
+                for frame in self.frames
             )
             + 2
         )
+
 
         data = {
             "version": 1,
@@ -312,12 +304,11 @@ class ImageEncoder(object):
         self.output_path = output_path
         # Frame shape should be lines-first, so w and h are swapped
         h, w, pixfmt = frame_shape
-        if pixfmt != 3 and pixfmt != 4:
+        if pixfmt not in [3, 4]:
             raise error.InvalidFrame(
-                "Your frame has shape {}, but we require (w,h,3) or (w,h,4), i.e., RGB values for a w-by-h image, with an optional alpha channel.".format(
-                    frame_shape
-                )
+                f"Your frame has shape {frame_shape}, but we require (w,h,3) or (w,h,4), i.e., RGB values for a w-by-h image, with an optional alpha channel."
             )
+
         self.wh = (w, h)
         self.includes_alpha = pixfmt == 4
         self.frame_shape = frame_shape
@@ -392,22 +383,19 @@ class ImageEncoder(object):
     def capture_frame(self, frame):
         if not isinstance(frame, (np.ndarray, np.generic)):
             raise error.InvalidFrame(
-                "Wrong type {} for {} (must be np.ndarray or np.generic)".format(
-                    type(frame), frame
-                )
+                f"Wrong type {type(frame)} for {frame} (must be np.ndarray or np.generic)"
             )
+
         if frame.shape != self.frame_shape:
             raise error.InvalidFrame(
-                "Your frame has shape {}, but the VideoRecorder is configured for shape {}.".format(
-                    frame.shape, self.frame_shape
-                )
+                f"Your frame has shape {frame.shape}, but the VideoRecorder is configured for shape {self.frame_shape}."
             )
+
         if frame.dtype != np.uint8:
             raise error.InvalidFrame(
-                "Your frame has data type {}, but we require uint8 (i.e. RGB values from 0-255).".format(
-                    frame.dtype
-                )
+                f"Your frame has data type {frame.dtype}, but we require uint8 (i.e. RGB values from 0-255)."
             )
+
 
         try:
             if distutils.version.LooseVersion(
@@ -424,4 +412,4 @@ class ImageEncoder(object):
         self.proc.stdin.close()
         ret = self.proc.wait()
         if ret != 0:
-            logger.error("VideoRecorder encoder exited with status {}".format(ret))
+            logger.error(f"VideoRecorder encoder exited with status {ret}")

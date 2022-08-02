@@ -36,18 +36,19 @@ flatdims = [3, 4, 4, 15, 7, 9, 14, 10, 7]
 @pytest.mark.parametrize(["space", "flatdim"], zip(spaces, flatdims))
 def test_flatdim(space, flatdim):
     dim = utils.flatdim(space)
-    assert dim == flatdim, "Expected {} to equal {}".format(dim, flatdim)
+    assert dim == flatdim, f"Expected {dim} to equal {flatdim}"
 
 
 @pytest.mark.parametrize("space", spaces)
 def test_flatten_space_boxes(space):
     flat_space = utils.flatten_space(space)
-    assert isinstance(flat_space, Box), "Expected {} to equal {}".format(
-        type(flat_space), Box
-    )
+    assert isinstance(
+        flat_space, Box
+    ), f"Expected {type(flat_space)} to equal {Box}"
+
     flatdim = utils.flatdim(space)
     (single_dim,) = flat_space.shape
-    assert single_dim == flatdim, "Expected {} to equal {}".format(single_dim, flatdim)
+    assert single_dim == flatdim, f"Expected {single_dim} to equal {flatdim}"
 
 
 @pytest.mark.parametrize("space", spaces)
@@ -56,9 +57,9 @@ def test_flat_space_contains_flat_points(space):
     flattened_samples = [utils.flatten(space, sample) for sample in some_samples]
     flat_space = utils.flatten_space(space)
     for i, flat_sample in enumerate(flattened_samples):
-        assert flat_sample in flat_space, "Expected sample #{} {} to be in {}".format(
-            i, flat_sample, flat_space
-        )
+        assert (
+            flat_sample in flat_space
+        ), f"Expected sample #{i} {flat_sample} to be in {flat_space}"
 
 
 @pytest.mark.parametrize("space", spaces)
@@ -66,7 +67,7 @@ def test_flatten_dim(space):
     sample = utils.flatten(space, space.sample())
     (single_dim,) = sample.shape
     flatdim = utils.flatdim(space)
-    assert single_dim == flatdim, "Expected {} to equal {}".format(single_dim, flatdim)
+    assert single_dim == flatdim, f"Expected {single_dim} to equal {flatdim}"
 
 
 @pytest.mark.parametrize("space", spaces)
@@ -81,7 +82,7 @@ def test_flatten_roundtripping(space):
     ):
         assert compare_nested(
             original, roundtripped
-        ), "Expected sample #{} {} to equal {}".format(i, original, roundtripped)
+        ), f"Expected sample #{i} {original} to equal {roundtripped}"
 
 
 def compare_nested(left, right):
@@ -144,9 +145,8 @@ def test_dtypes(original_space, expected_flattened_dtype):
     ), "Expected flattened_space to contain flattened_sample"
     assert (
         flattened_space.dtype == expected_flattened_dtype
-    ), "Expected flattened_space's dtype to equal " "{}".format(
-        expected_flattened_dtype
-    )
+    ), f"Expected flattened_space's dtype to equal {expected_flattened_dtype}"
+
 
     assert flattened_sample.dtype == flattened_space.dtype, (
         "Expected flattened_space's dtype to equal " "flattened_sample's dtype "
@@ -157,10 +157,10 @@ def test_dtypes(original_space, expected_flattened_dtype):
 
 def compare_sample_types(original_space, original_sample, unflattened_sample):
     if isinstance(original_space, Discrete):
-        assert isinstance(unflattened_sample, int), (
-            "Expected unflattened_sample to be an int. unflattened_sample: "
-            "{} original_sample: {}".format(unflattened_sample, original_sample)
-        )
+        assert isinstance(
+            unflattened_sample, int
+        ), f"Expected unflattened_sample to be an int. unflattened_sample: {unflattened_sample} original_sample: {original_sample}"
+
     elif isinstance(original_space, Tuple):
         for index in range(len(original_space)):
             compare_sample_types(
@@ -172,11 +172,9 @@ def compare_sample_types(original_space, original_sample, unflattened_sample):
         for key, space in original_space.spaces.items():
             compare_sample_types(space, original_sample[key], unflattened_sample[key])
     else:
-        assert unflattened_sample.dtype == original_sample.dtype, (
-            "Expected unflattened_sample's dtype to equal "
-            "original_sample's dtype. unflattened_sample: "
-            "{} original_sample: {}".format(unflattened_sample, original_sample)
-        )
+        assert (
+            unflattened_sample.dtype == original_sample.dtype
+        ), f"Expected unflattened_sample's dtype to equal original_sample's dtype. unflattened_sample: {unflattened_sample} original_sample: {original_sample}"
 
 
 samples = [

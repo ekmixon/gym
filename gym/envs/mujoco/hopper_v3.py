@@ -54,8 +54,7 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         )
 
     def control_cost(self, action):
-        control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
-        return control_cost
+        return self._ctrl_cost_weight * np.sum(np.square(action))
 
     @property
     def is_healthy(self):
@@ -70,14 +69,11 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         healthy_z = min_z < z < max_z
         healthy_angle = min_angle < angle < max_angle
 
-        is_healthy = all((healthy_state, healthy_z, healthy_angle))
-
-        return is_healthy
+        return all((healthy_state, healthy_z, healthy_angle))
 
     @property
     def done(self):
-        done = not self.is_healthy if self._terminate_when_unhealthy else False
-        return done
+        return not self.is_healthy if self._terminate_when_unhealthy else False
 
     def _get_obs(self):
         position = self.sim.data.qpos.flat.copy()
@@ -86,8 +82,7 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         if self._exclude_current_positions_from_observation:
             position = position[1:]
 
-        observation = np.concatenate((position, velocity)).ravel()
-        return observation
+        return np.concatenate((position, velocity)).ravel()
 
     def step(self, action):
         x_position_before = self.sim.data.qpos[0]
@@ -126,8 +121,7 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         self.set_state(qpos, qvel)
 
-        observation = self._get_obs()
-        return observation
+        return self._get_obs()
 
     def viewer_setup(self):
         for key, value in DEFAULT_CAMERA_CONFIG.items():

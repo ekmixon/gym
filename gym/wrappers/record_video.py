@@ -28,7 +28,7 @@ class RecordVideo(gym.Wrapper):
         if episode_trigger is None and step_trigger is None:
             episode_trigger = capped_cubic_video_schedule
 
-        trigger_count = sum([x is not None for x in [episode_trigger, step_trigger]])
+        trigger_count = sum(x is not None for x in [episode_trigger, step_trigger])
         assert trigger_count == 1, "Must specify exactly one trigger"
 
         self.episode_trigger = episode_trigger
@@ -87,25 +87,16 @@ class RecordVideo(gym.Wrapper):
 
         # increment steps and episodes
         self.step_id += 1
-        if not self.is_vector_env:
-            if dones:
-                self.episode_id += 1
-        elif dones[0]:
+        if not self.is_vector_env and dones or self.is_vector_env and dones[0]:
             self.episode_id += 1
-
         if self.recording:
             self.video_recorder.capture_frame()
             self.recorded_frames += 1
             if self.video_length > 0:
                 if self.recorded_frames > self.video_length:
                     self.close_video_recorder()
-            else:
-                if not self.is_vector_env:
-                    if dones:
-                        self.close_video_recorder()
-                elif dones[0]:
-                    self.close_video_recorder()
-
+            elif not self.is_vector_env and dones or self.is_vector_env and dones[0]:
+                self.close_video_recorder()
         elif self._video_enabled():
             self.start_video_recorder()
 

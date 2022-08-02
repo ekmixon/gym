@@ -34,12 +34,11 @@ class HandEnv(robot_env.RobotEnv):
                     self.sim.model.actuator_names[i].replace(":A_", ":")
                 )
             for joint_name in ["FF", "MF", "RF", "LF"]:
-                act_idx = self.sim.model.actuator_name2id(
-                    "robot0:A_{}J1".format(joint_name)
-                )
+                act_idx = self.sim.model.actuator_name2id(f"robot0:A_{joint_name}J1")
                 actuation_center[act_idx] += self.sim.data.get_joint_qpos(
-                    "robot0:{}J0".format(joint_name)
+                    f"robot0:{joint_name}J0"
                 )
+
         else:
             actuation_center = (ctrlrange[:, 1] + ctrlrange[:, 0]) / 2.0
         self.sim.data.ctrl[:] = actuation_center + action * actuation_range

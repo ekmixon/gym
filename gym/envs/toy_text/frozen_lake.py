@@ -40,7 +40,7 @@ def generate_random_map(size=8, p=0.8):
         frontier.append((0, 0))
         while frontier:
             r, c = frontier.pop()
-            if not (r, c) in discovered:
+            if (r, c) not in discovered:
                 discovered.add((r, c))
                 directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
                 for x, y in directions:
@@ -92,10 +92,8 @@ class FrozenLakeEnv(discrete.DiscreteEnv):
     metadata = {"render.modes": ["human", "ansi"]}
 
     def __init__(self, desc=None, map_name="4x4", is_slippery=True):
-        if desc is None and map_name is None:
-            desc = generate_random_map()
-        elif desc is None:
-            desc = MAPS[map_name]
+        if desc is None:
+            desc = generate_random_map() if map_name is None else MAPS[map_name]
         self.desc = desc = np.asarray(desc, dtype="c")
         self.nrow, self.ncol = nrow, ncol = desc.shape
         self.reward_range = (0, 1)
@@ -157,9 +155,7 @@ class FrozenLakeEnv(discrete.DiscreteEnv):
         desc = [[c.decode("utf-8") for c in line] for line in desc]
         desc[row][col] = utils.colorize(desc[row][col], "red", highlight=True)
         if self.lastaction is not None:
-            outfile.write(
-                "  ({})\n".format(["Left", "Down", "Right", "Up"][self.lastaction])
-            )
+            outfile.write(f'  ({["Left", "Down", "Right", "Up"][self.lastaction]})\n')
         else:
             outfile.write("\n")
         outfile.write("\n".join("".join(line) for line in desc) + "\n")

@@ -14,7 +14,7 @@ DEFAULT_CAMERA_CONFIG = {
 def mass_center(model, sim):
     mass = np.expand_dims(model.body_mass, axis=1)
     xpos = sim.data.xipos
-    return (np.sum(mass * xpos, axis=0) / np.sum(mass))[0:2].copy()
+    return (np.sum(mass * xpos, axis=0) / np.sum(mass))[:2].copy()
 
 
 class HumanoidEnv(mujoco_env.MujocoEnv, utils.EzPickle):
@@ -57,8 +57,7 @@ class HumanoidEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         )
 
     def control_cost(self, action):
-        control_cost = self._ctrl_cost_weight * np.sum(np.square(self.sim.data.ctrl))
-        return control_cost
+        return self._ctrl_cost_weight * np.sum(np.square(self.sim.data.ctrl))
 
     @property
     def contact_cost(self):
@@ -71,14 +70,11 @@ class HumanoidEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     @property
     def is_healthy(self):
         min_z, max_z = self._healthy_z_range
-        is_healthy = min_z < self.sim.data.qpos[2] < max_z
-
-        return is_healthy
+        return min_z < self.sim.data.qpos[2] < max_z
 
     @property
     def done(self):
-        done = (not self.is_healthy) if self._terminate_when_unhealthy else False
-        return done
+        return (not self.is_healthy) if self._terminate_when_unhealthy else False
 
     def _get_obs(self):
         position = self.sim.data.qpos.flat.copy()
@@ -151,8 +147,7 @@ class HumanoidEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         )
         self.set_state(qpos, qvel)
 
-        observation = self._get_obs()
-        return observation
+        return self._get_obs()
 
     def viewer_setup(self):
         for key, value in DEFAULT_CAMERA_CONFIG.items():

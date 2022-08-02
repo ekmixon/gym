@@ -128,10 +128,10 @@ class FetchEnv(robot_env.RobotEnv):
             robot_qvel[-2:] * dt
         )  # change to a scalar if the gripper is made symmetric
 
-        if not self.has_object:
-            achieved_goal = grip_pos.copy()
-        else:
-            achieved_goal = np.squeeze(object_pos.copy())
+        achieved_goal = (
+            np.squeeze(object_pos.copy()) if self.has_object else grip_pos.copy()
+        )
+
         obs = np.concatenate(
             [
                 grip_pos,

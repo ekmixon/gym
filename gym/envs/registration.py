@@ -25,8 +25,7 @@ plugin_internal_whitelist = {"ale_py.gym"}
 def load(name):
     mod_name, attr_name = name.split(":")
     mod = importlib.import_module(mod_name)
-    fn = getattr(mod, attr_name)
-    return fn
+    return getattr(mod, attr_name)
 
 
 class EnvSpec(object):
@@ -62,23 +61,20 @@ class EnvSpec(object):
         self.order_enforce = order_enforce
         self._kwargs = {} if kwargs is None else kwargs
 
-        match = env_id_re.search(id)
-        if not match:
+        if match := env_id_re.search(id):
+            self._env_name = match.group(1)
+        else:
             raise error.Error(
-                "Attempted to register malformed environment ID: {}. (Currently all IDs must be of the form {}.)".format(
-                    id, env_id_re.pattern
-                )
+                f"Attempted to register malformed environment ID: {id}. (Currently all IDs must be of the form {env_id_re.pattern}.)"
             )
-        self._env_name = match.group(1)
 
     def make(self, **kwargs):
         """Instantiates an instance of the environment with appropriate kwargs"""
         if self.entry_point is None:
             raise error.Error(
-                "Attempting to make deprecated env {}. (HINT: is there a newer registered version of this env?)".format(
-                    self.id
-                )
+                f"Attempting to make deprecated env {self.id}. (HINT: is there a newer registered version of this env?)"
             )
+
 
         _kwargs = self._kwargs.copy()
         _kwargs.update(kwargs)
@@ -97,15 +93,14 @@ class EnvSpec(object):
             from gym.wrappers.time_limit import TimeLimit
 
             env = TimeLimit(env, max_episode_steps=env.spec.max_episode_steps)
-        else:
-            if self.order_enforce:
-                from gym.wrappers.order_enforcing import OrderEnforcing
+        elif self.order_enforce:
+            from gym.wrappers.order_enforcing import OrderEnforcing
 
-                env = OrderEnforcing(env)
+            env = OrderEnforcing(env)
         return env
 
     def __repr__(self):
-        return "EnvSpec({})".format(self.id)
+        return f"EnvSpec({self.id})"
 
 
 class EnvRegistry(object):
@@ -121,13 +116,12 @@ class EnvRegistry(object):
         self._ns = None
 
     def make(self, path, **kwargs):
-        if len(kwargs) > 0:
+        if kwargs:
             logger.info("Making new env: %s (%s)", path, kwargs)
         else:
             logger.info("Making new env: %s", path)
         spec = self.spec(path)
-        env = spec.make(**kwargs)
-        return env
+        return spec.make(**kwargs)
 
     def all(self):
         return self.env_specs.values()
@@ -139,20 +133,18 @@ class EnvRegistry(object):
                 importlib.import_module(mod_name)
             except ModuleNotFoundError:
                 raise error.Error(
-                    "A module ({}) was specified for the environment but was not found, make sure the package is installed with `pip install` before calling `gym.make()`".format(
-                        mod_name
-                    )
+                    f"A module ({mod_name}) was specified for the environment but was not found, make sure the package is installed with `pip install` before calling `gym.make()`"
                 )
+
         else:
             id = path
 
         match = env_id_re.search(id)
         if not match:
             raise error.Error(
-                "Attempted to look up malformed environment ID: {}. (Currently all IDs must be of the form {}.)".format(
-                    id.encode("utf-8"), env_id_re.pattern
-                )
+                f'Attempted to look up malformed environment ID: {id.encode("utf-8")}. (Currently all IDs must be of the form {env_id_re.pattern}.)'
             )
+
 
         try:
             return self.env_specs[id]
@@ -183,24 +175,21 @@ class EnvRegistry(object):
             ]
             if matching_envs:
                 raise error.DeprecatedEnv(
-                    "Env {} not found (valid versions include {})".format(
-                        id, matching_envs
-                    )
+                    f"Env {id} not found (valid versions include {matching_envs})"
                 )
+
             elif env_name in algorithmic_envs:
                 raise error.UnregisteredEnv(
-                    "Algorithmic environment {} has been moved out of Gym. Install it via `pip install gym-algorithmic` and add `import gym_algorithmic` before using it.".format(
-                        id
-                    )
+                    f"Algorithmic environment {id} has been moved out of Gym. Install it via `pip install gym-algorithmic` and add `import gym_algorithmic` before using it."
                 )
+
             elif env_name in toytext_envs:
                 raise error.UnregisteredEnv(
-                    "Toytext environment {} has been moved out of Gym. Install it via `pip install gym-legacy-toytext` and add `import gym_toytext` before using it.".format(
-                        id
-                    )
+                    f"Toytext environment {id} has been moved out of Gym. Install it via `pip install gym-legacy-toytext` and add `import gym_toytext` before using it."
                 )
+
             else:
-                raise error.UnregisteredEnv("No registered env with id: {}".format(id))
+                raise error.UnregisteredEnv(f"No registered env with id: {id}")
 
     def register(self, id, **kwargs):
         if self._ns is not None:
@@ -213,7 +202,7 @@ class EnvRegistry(object):
                 )
             id = f"{self._ns}/{id}"
         if id in self.env_specs:
-            logger.warn("Overriding environment {}".format(id))
+            logger.warn(f"Overriding environment {id}")
         self.env_specs[id] = EnvSpec(id, **kwargs)
 
     @contextlib.contextmanager

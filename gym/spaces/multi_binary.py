@@ -28,21 +28,16 @@ class MultiBinary(Space):
 
     def __init__(self, n, seed=None):
         self.n = n
-        if type(n) in [tuple, list, np.ndarray]:
-            input_n = n
-        else:
-            input_n = (n,)
+        input_n = n if type(n) in [tuple, list, np.ndarray] else (n, )
         super(MultiBinary, self).__init__(input_n, np.int8, seed)
 
     def sample(self):
         return self.np_random.randint(low=0, high=2, size=self.n, dtype=self.dtype)
 
     def contains(self, x):
-        if isinstance(x, list) or isinstance(x, tuple):
+        if isinstance(x, (list, tuple)):
             x = np.array(x)  # Promote list to array for contains check
-        if self.shape != x.shape:
-            return False
-        return ((x == 0) | (x == 1)).all()
+        return False if self.shape != x.shape else ((x == 0) | (x == 1)).all()
 
     def to_jsonable(self, sample_n):
         return np.array(sample_n).tolist()
@@ -51,7 +46,7 @@ class MultiBinary(Space):
         return [np.asarray(sample) for sample in sample_n]
 
     def __repr__(self):
-        return "MultiBinary({})".format(self.n)
+        return f"MultiBinary({self.n})"
 
     def __eq__(self, other):
         return isinstance(other, MultiBinary) and self.n == other.n

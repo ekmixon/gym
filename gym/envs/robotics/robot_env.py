@@ -10,10 +10,9 @@ try:
     import mujoco_py
 except ImportError as e:
     raise error.DependencyNotInstalled(
-        "{}. (HINT: you need to install mujoco_py, and also perform the setup instructions here: https://github.com/openai/mujoco-py/.)".format(
-            e
-        )
+        f"{e}. (HINT: you need to install mujoco_py, and also perform the setup instructions here: https://github.com/openai/mujoco-py/.)"
     )
+
 
 DEFAULT_SIZE = 500
 
@@ -25,7 +24,7 @@ class RobotEnv(gym.GoalEnv):
         else:
             fullpath = os.path.join(os.path.dirname(__file__), "assets", model_path)
         if not os.path.exists(fullpath):
-            raise IOError("File {} does not exist".format(fullpath))
+            raise IOError(f"File {fullpath} does not exist")
 
         model = mujoco_py.load_model_from_path(fullpath)
         self.sim = mujoco_py.MjSim(model, nsubsteps=n_substeps)
@@ -94,8 +93,7 @@ class RobotEnv(gym.GoalEnv):
         while not did_reset_sim:
             did_reset_sim = self._reset_sim()
         self.goal = self._sample_goal().copy()
-        obs = self._get_obs()
-        return obs
+        return self._get_obs()
 
     def close(self):
         if self.viewer is not None:

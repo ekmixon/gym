@@ -8,7 +8,10 @@ try:
     matplotlib.use("TkAgg")
     import matplotlib.pyplot as plt
 except ImportError as e:
-    logger.warn("failed to set matplotlib backend, plotting will not work: %s" % str(e))
+    logger.warn(
+        f"failed to set matplotlib backend, plotting will not work: {str(e)}"
+    )
+
     plt = None
 
 from collections import deque
@@ -123,17 +126,26 @@ def play(env, transpose=True, fps=30, zoom=None, callback=None, keys_to_action=N
         # process pygame events
         for event in pygame.event.get():
             # test events, set key states
-            if event.type == pygame.KEYDOWN:
-                if event.key in relevant_keys:
-                    pressed_keys.append(event.key)
-                elif event.key == 27:
-                    running = False
-            elif event.type == pygame.KEYUP:
-                if event.key in relevant_keys:
-                    pressed_keys.remove(event.key)
-            elif event.type == pygame.QUIT:
+            if event.type == pygame.KEYDOWN and event.key in relevant_keys:
+                pressed_keys.append(event.key)
+            elif (
+                event.type == pygame.KEYDOWN
+                and event.key == 27
+                or event.type != pygame.KEYDOWN
+                and event.type != pygame.KEYUP
+                and event.type == pygame.QUIT
+            ):
                 running = False
-            elif event.type == VIDEORESIZE:
+            elif (
+                event.type == pygame.KEYDOWN
+                or event.type == pygame.KEYUP
+                and event.key not in relevant_keys
+                or event.type not in [pygame.KEYUP, VIDEORESIZE]
+            ):
+                pass
+            elif event.type == pygame.KEYUP:
+                pressed_keys.remove(event.key)
+            else:
                 video_size = event.size
                 screen = pygame.display.set_mode(video_size)
                 print(video_size)

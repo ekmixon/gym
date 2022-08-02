@@ -92,7 +92,7 @@ class MountainCarEnv(gym.Env):
         if position == self.min_position and velocity < 0:
             velocity = 0
 
-        done = bool(position >= self.goal_position and velocity >= self.goal_velocity)
+        done = position >= self.goal_position and velocity >= self.goal_velocity
         reward = -1.0
 
         self.state = (position, velocity)
@@ -107,15 +107,12 @@ class MountainCarEnv(gym.Env):
 
     def render(self, mode="human"):
         screen_width = 600
-        screen_height = 400
-
         world_width = self.max_position - self.min_position
         scale = screen_width / world_width
-        carwidth = 40
-        carheight = 20
-
         if self.viewer is None:
             from gym.envs.classic_control import rendering
+
+            screen_height = 400
 
             self.viewer = rendering.Viewer(screen_width, screen_height)
             xs = np.linspace(self.min_position, self.max_position, 100)
@@ -127,6 +124,9 @@ class MountainCarEnv(gym.Env):
             self.viewer.add_geom(self.track)
 
             clearance = 10
+
+            carwidth = 40
+            carheight = 20
 
             l, r, t, b = -carwidth / 2, carwidth / 2, carheight, 0
             car = rendering.FilledPolygon([(l, b), (l, t), (r, t), (r, b)])

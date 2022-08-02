@@ -128,7 +128,7 @@ class AcrobotEnv(core.Env):
         ns[3] = bound(ns[3], -self.MAX_VEL_2, self.MAX_VEL_2)
         self.state = ns
         terminal = self._terminal()
-        reward = -1.0 if not terminal else 0.0
+        reward = 0.0 if terminal else -1.0
         return (self._get_ob(), reward, terminal, {})
 
     def _get_ob(self):
@@ -139,7 +139,7 @@ class AcrobotEnv(core.Env):
 
     def _terminal(self):
         s = self.state
-        return bool(-cos(s[0]) - cos(s[1] + s[0]) > 1.0)
+        return -cos(s[0]) - cos(s[1] + s[0]) > 1.0
 
     def _dsdt(self, s_augmented):
         m1 = self.LINK_MASS_1

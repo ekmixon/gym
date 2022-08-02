@@ -24,8 +24,9 @@ def test_record_video_using_default_trigger():
     assert os.path.isdir("videos")
     mp4_files = [file for file in os.listdir("videos") if file.endswith(".mp4")]
     assert len(mp4_files) == sum(
-        [capped_cubic_video_schedule(i) for i in range(env.episode_id + 1)]
+        capped_cubic_video_schedule(i) for i in range(env.episode_id + 1)
     )
+
     shutil.rmtree("videos")
 
 
@@ -63,7 +64,7 @@ def test_record_video_within_vector():
     envs = gym.vector.SyncVectorEnv([make_env("CartPole-v1", 1 + i) for i in range(2)])
     envs = gym.wrappers.RecordEpisodeStatistics(envs)
     envs.reset()
-    for i in range(199):
+    for _ in range(199):
         _, _, _, infos = envs.step(envs.action_space.sample())
         for info in infos:
             if "episode" in info.keys():

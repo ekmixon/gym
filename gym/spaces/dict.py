@@ -111,8 +111,7 @@ class Dict(Space, Mapping):
         self.spaces[key] = value
 
     def __iter__(self):
-        for key in self.spaces:
-            yield key
+        yield from self.spaces
 
     def __len__(self):
         return len(self.spaces)
@@ -120,9 +119,8 @@ class Dict(Space, Mapping):
     def __repr__(self):
         return (
             "Dict("
-            + ", ".join([str(k) + ":" + str(s) for k, s in self.spaces.items()])
-            + ")"
-        )
+            + ", ".join([f"{str(k)}:{str(s)}" for k, s in self.spaces.items()])
+        ) + ")"
 
     def to_jsonable(self, sample_n):
         # serialize as dict-repr of vectors

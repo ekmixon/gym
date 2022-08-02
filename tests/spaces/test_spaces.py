@@ -50,8 +50,8 @@ def test_roundtripping(space):
     s1p = space.to_jsonable([sample_1_prime])
     s2 = space.to_jsonable([sample_2])
     s2p = space.to_jsonable([sample_2_prime])
-    assert s1 == s1p, "Expected {} to equal {}".format(s1, s1p)
-    assert s2 == s2p, "Expected {} to equal {}".format(s2, s2p)
+    assert s1 == s1p, f"Expected {s1} to equal {s1p}"
+    assert s2 == s2p, f"Expected {s2} to equal {s2p}"
 
 
 @pytest.mark.parametrize(
@@ -85,7 +85,7 @@ def test_roundtripping(space):
 def test_equality(space):
     space1 = space
     space2 = copy.copy(space)
-    assert space1 == space2, "Expected {} to equal {}".format(space1, space2)
+    assert space1 == space2, f"Expected {space1} to equal {space2}"
 
 
 @pytest.mark.parametrize(
@@ -114,7 +114,7 @@ def test_equality(space):
 )
 def test_inequality(spaces):
     space1, space2 = spaces
-    assert space1 != space2, "Expected {} != {}".format(space1, space2)
+    assert space1 != space2, f"Expected {space1} != {space2}"
 
 
 @pytest.mark.parametrize(
@@ -225,7 +225,7 @@ def test_seed_Dict():
     c = Discrete(5)
     c.seed(3)
 
-    for i in range(10):
+    for _ in range(10):
         test_s = test_space.sample()
         a_s = a.sample()
         assert (test_s["a"] == a_s).all()
@@ -282,7 +282,7 @@ def test_seed_returns_list(space):
     def assert_integer_list(seed):
         assert isinstance(seed, list)
         assert len(seed) >= 1
-        assert all([isinstance(s, int) for s in seed])
+        assert all(isinstance(s, int) for s in seed)
 
     assert_integer_list(space.seed(None))
     assert_integer_list(space.seed(0))
@@ -383,8 +383,8 @@ def test_multidiscrete_as_tuple():
 
     assert space.shape == (3,)
     assert space[0] == Discrete(3)
-    assert space[0:1] == MultiDiscrete([3])
-    assert space[0:2] == MultiDiscrete([3, 4])
+    assert space[:1] == MultiDiscrete([3])
+    assert space[:2] == MultiDiscrete([3, 4])
     assert space[:] == space and space[:] is not space
     assert len(space) == 3
 
@@ -394,7 +394,7 @@ def test_multidiscrete_as_tuple():
     assert space.shape == (2, 3)
     assert space[0, 1] == Discrete(4)
     assert space[0] == MultiDiscrete([3, 4, 5])
-    assert space[0:1] == MultiDiscrete([[3, 4, 5]])
+    assert space[:1] == MultiDiscrete([[3, 4, 5]])
     assert space[0:2, :] == MultiDiscrete([[3, 4, 5], [6, 7, 8]])
     assert space[:, 0:1] == MultiDiscrete([[3], [6]])
     assert space[0:2, 0:2] == MultiDiscrete([[3, 4], [6, 7]])
@@ -408,8 +408,8 @@ def test_multidiscrete_subspace_reproducibility():
     space.seed(None)
 
     assert sample_equal(space[0].sample(), space[0].sample())
-    assert sample_equal(space[0:1].sample(), space[0:1].sample())
-    assert sample_equal(space[0:2].sample(), space[0:2].sample())
+    assert sample_equal(space[:1].sample(), space[:1].sample())
+    assert sample_equal(space[:2].sample(), space[:2].sample())
     assert sample_equal(space[:].sample(), space[:].sample())
     assert sample_equal(space[:].sample(), space.sample())
 
@@ -419,7 +419,7 @@ def test_multidiscrete_subspace_reproducibility():
 
     assert sample_equal(space[0, 1].sample(), space[0, 1].sample())
     assert sample_equal(space[0].sample(), space[0].sample())
-    assert sample_equal(space[0:1].sample(), space[0:1].sample())
+    assert sample_equal(space[:1].sample(), space[:1].sample())
     assert sample_equal(space[0:2, :].sample(), space[0:2, :].sample())
     assert sample_equal(space[:, 0:1].sample(), space[:, 0:1].sample())
     assert sample_equal(space[0:2, 0:2].sample(), space[0:2, 0:2].sample())

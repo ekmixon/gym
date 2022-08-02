@@ -21,11 +21,10 @@ def colorize(string, color, bold=False, highlight=False):
     blue, magenta, cyan, white, crimson
     """
 
-    attr = []
     num = color2num[color]
     if highlight:
         num += 10
-    attr.append(str(num))
+    attr = [str(num)]
     if bold:
         attr.append("1")
     attrs = ";".join(attr)

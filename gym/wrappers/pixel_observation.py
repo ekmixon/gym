@@ -55,7 +55,7 @@ class PixelObservationWrapper(ObservationWrapper):
 
         if isinstance(wrapped_observation_space, spaces.Box):
             self._observation_is_dict = False
-            invalid_keys = set([STATE_KEY])
+            invalid_keys = {STATE_KEY}
         elif isinstance(wrapped_observation_space, (spaces.Dict, MutableMapping)):
             self._observation_is_dict = True
             invalid_keys = set(wrapped_observation_space.spaces.keys())
@@ -63,10 +63,7 @@ class PixelObservationWrapper(ObservationWrapper):
             raise ValueError("Unsupported observation space structure.")
 
         if not pixels_only:
-            # Make sure that now keys in the `pixel_keys` overlap with
-            # `observation_keys`
-            overlapping_keys = set(pixel_keys) & set(invalid_keys)
-            if overlapping_keys:
+            if overlapping_keys := set(pixel_keys) & set(invalid_keys):
                 raise ValueError(
                     "Duplicate or reserved pixel keys {!r}.".format(overlapping_keys)
                 )
@@ -105,8 +102,7 @@ class PixelObservationWrapper(ObservationWrapper):
         self._pixel_keys = pixel_keys
 
     def observation(self, observation):
-        pixel_observation = self._add_pixel_observation(observation)
-        return pixel_observation
+        return self._add_pixel_observation(observation)
 
     def _add_pixel_observation(self, wrapped_observation):
         if self._pixels_only:

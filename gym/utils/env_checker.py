@@ -182,7 +182,7 @@ def _check_returned_values(
             try:
                 _check_obs(obs[key], observation_space.spaces[key], "reset")
             except AssertionError as e:
-                raise AssertionError(f"Error while checking key={key}: " + str(e))
+                raise AssertionError(f"Error while checking key={key}: {str(e)}")
     else:
         _check_obs(obs, observation_space, "reset")
 
@@ -205,7 +205,7 @@ def _check_returned_values(
             try:
                 _check_obs(obs[key], observation_space.spaces[key], "step")
             except AssertionError as e:
-                raise AssertionError(f"Error while checking key={key}: " + str(e))
+                raise AssertionError(f"Error while checking key={key}: {str(e)}")
 
     else:
         _check_obs(obs, observation_space, "step")
@@ -234,19 +234,22 @@ def _check_spaces(env: gym.Env) -> None:
     # Helper to link to the code, because gym has no proper documentation
     gym_spaces = " cf https://github.com/openai/gym/blob/master/gym/spaces/"
 
-    assert hasattr(env, "observation_space"), (
-        "You must specify an observation space (cf gym.spaces)" + gym_spaces
-    )
-    assert hasattr(env, "action_space"), (
-        "You must specify an action space (cf gym.spaces)" + gym_spaces
-    )
+    assert hasattr(
+        env, "observation_space"
+    ), f"You must specify an observation space (cf gym.spaces){gym_spaces}"
 
-    assert isinstance(env.observation_space, spaces.Space), (
-        "The observation space must inherit from gym.spaces" + gym_spaces
-    )
-    assert isinstance(env.action_space, spaces.Space), (
-        "The action space must inherit from gym.spaces" + gym_spaces
-    )
+    assert hasattr(
+        env, "action_space"
+    ), f"You must specify an action space (cf gym.spaces){gym_spaces}"
+
+
+    assert isinstance(
+        env.observation_space, spaces.Space
+    ), f"The observation space must inherit from gym.spaces{gym_spaces}"
+
+    assert isinstance(
+        env.action_space, spaces.Space
+    ), f"The action space must inherit from gym.spaces{gym_spaces}"
 
 
 # Check render cannot be covered by CI

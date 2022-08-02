@@ -33,9 +33,7 @@ class LazyFrames(object):
 
     def __array__(self, dtype=None):
         arr = self[:]
-        if dtype is not None:
-            return arr.astype(dtype)
-        return arr
+        return arr.astype(dtype) if dtype is not None else arr
 
     def __len__(self):
         return self.shape[0]

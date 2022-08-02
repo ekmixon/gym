@@ -43,7 +43,7 @@ def atomic_write(filepath, binary=False, fsync=False):
     :param fsync: whether to force write the file to disk
     """
 
-    tmppath = filepath + "~"
+    tmppath = f"{filepath}~"
     while os.path.isfile(tmppath):
         tmppath += "~"
     try:

@@ -10,7 +10,7 @@ from gym.utils import atomic_write, closer
 from gym.utils.json_utils import json_encode_np
 
 FILE_PREFIX = "openaigym"
-MANIFEST_PREFIX = FILE_PREFIX + ".manifest"
+MANIFEST_PREFIX = f"{FILE_PREFIX}.manifest"
 
 
 class Monitor(Wrapper):
@@ -102,10 +102,9 @@ class Monitor(Wrapper):
             video_callable = disable_videos
         elif not callable(video_callable):
             raise error.Error(
-                "You must provide a function, None, or False for video_callable, not {}: {}".format(
-                    type(video_callable), video_callable
-                )
+                f"You must provide a function, None, or False for video_callable, not {type(video_callable)}: {video_callable}"
             )
+
         self.video_callable = video_callable
 
         # Check on whether we need to clear anything
@@ -127,14 +126,15 @@ class Monitor(Wrapper):
         # We use the 'openai-gym' prefix to determine if a file is
         # ours
         self.file_prefix = FILE_PREFIX
-        self.file_infix = "{}.{}".format(self._monitor_id, uid if uid else os.getpid())
+        self.file_infix = f"{self._monitor_id}.{uid or os.getpid()}"
 
         self.stats_recorder = stats_recorder.StatsRecorder(
             self.directory,
-            "{}.episode_batch.{}".format(self.file_prefix, self.file_infix),
+            f"{self.file_prefix}.episode_batch.{self.file_infix}",
             autoreset=self.env_semantics_autoreset,
             env_id=env_id,
         )
+
 
         self.write_upon_reset = write_upon_reset
 
@@ -152,8 +152,9 @@ class Monitor(Wrapper):
         # up from the filesystem later.
         path = os.path.join(
             self.directory,
-            "{}.manifest.{}.manifest.json".format(self.file_prefix, self.file_infix),
+            f"{self.file_prefix}.manifest.{self.file_infix}.manifest.json",
         )
+
         logger.debug("Writing training manifest file to %s", path)
         with atomic_write.atomic_write(path) as f:
             # We need to write relative paths here since people may
@@ -304,7 +305,7 @@ def detect_training_manifests(training_dir, files=None):
     return [
         os.path.join(training_dir, f)
         for f in files
-        if f.startswith(MANIFEST_PREFIX + ".")
+        if f.startswith(f"{MANIFEST_PREFIX}.")
     ]
 
 
@@ -312,7 +313,7 @@ def detect_monitor_files(training_dir):
     return [
         os.path.join(training_dir, f)
         for f in os.listdir(training_dir)
-        if f.startswith(FILE_PREFIX + ".")
+        if f.startswith(f"{FILE_PREFIX}.")
     ]
 
 
@@ -356,8 +357,7 @@ def load_env_info_from_manifests(manifests, training_dir):
             contents = json.load(f)
             env_infos.append(contents["env_info"])
 
-    env_info = collapse_env_infos(env_infos, training_dir)
-    return env_info
+    return collapse_env_infos(env_infos, training_dir)
 
 
 def load_results(training_dir):
@@ -446,11 +446,7 @@ def merge_stats_files(stats_files):
     else:
         episode_types = None
 
-    if len(initial_reset_timestamps) > 0:
-        initial_reset_timestamp = min(initial_reset_timestamps)
-    else:
-        initial_reset_timestamp = 0
-
+    initial_reset_timestamp = min(initial_reset_timestamps, default=0)
     return (
         data_sources,
         initial_reset_timestamps,
@@ -470,16 +466,14 @@ def collapse_env_infos(env_infos, training_dir):
     for other in env_infos[1:]:
         if first != other:
             raise error.Error(
-                "Found two unequal env_infos: {} and {}. This usually indicates that your training directory {} has commingled results from multiple runs.".format(
-                    first, other, training_dir
-                )
+                f"Found two unequal env_infos: {first} and {other}. This usually indicates that your training directory {training_dir} has commingled results from multiple runs."
             )
+
 
     for key in ["env_id", "gym_version"]:
         if key not in first:
             raise error.Error(
-                "env_info {} from training directory {} is missing expected key {}. This is unexpected and likely indicates a bug in gym.".format(
-                    first, training_dir, key
-                )
+                f"env_info {first} from training directory {training_dir} is missing expected key {key}. This is unexpected and likely indicates a bug in gym."
             )
+
     return first
